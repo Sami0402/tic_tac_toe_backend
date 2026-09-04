@@ -5,7 +5,7 @@ const http = require("http");
 
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = require('./middleware/auth');
+const cors = require("cors");
 
 const Room = require("./models/Room");
 
@@ -28,6 +28,9 @@ const roomRoutes = require('./routes/roomRoutes');
 
 const app = express();
 
+app.use(cors());
+app.use(express.json());
+
 // CREATE AN HTTP SERVER and WRAP IT ARROUND OUR BACKEND
 const server = http.createServer(app);
 
@@ -35,6 +38,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
+        methods: ["GET", "POST"],
     }
 });
 
