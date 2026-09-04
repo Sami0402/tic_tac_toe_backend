@@ -219,8 +219,6 @@ connectDB();
 
 app.use(express.json());
 
-app.use(authMiddleware);
-
 app.use('/auth', authRoutes);
 
 app.use('/rooms', roomRoutes);
