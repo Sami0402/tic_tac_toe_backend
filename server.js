@@ -179,11 +179,29 @@ io.on("connection", (socket) => {
 
     });
 
-    socket.on(SOCKET_EVENTS.LEAVE_ROOM, () => {
-        if (socket.roomCode) {
-            socket.leave(socket.roomCode);
+    socket.on(SOCKET_EVENTS.LEAVE_ROOM, async() => {     
+
+            // Destroy the Game
+        
+            // Check if socket is part of any room or not
+            if(!socket.roomCode) {return}
+
+            // find room where socket is playing
+            const room = await Room.findOne({ roomCode: socket.roomCode });
+            if(!room) {return}
+
+            socket.to(room.roomCode).emit(SOCKET_EVENTS.GAME_DESTROYED, {
+                message: "Opponent left the game."
+            } );
+
+            // Delte from MongoDB
+            await Room.deleteOne({ _id: room._id });
+
             socket.roomCode = null;
-        }
+            socket.leave(socket.roomCode);
+
+            console.log('Game Destroye Event Works')
+        
     })
 
     // Each 'socket' listens for events seprately
@@ -204,10 +222,6 @@ io.on("connection", (socket) => {
         socket.to(room.roomCode).emit(SOCKET_EVENTS.GAME_DESTROYED, {
             message: "Opponent left the game."
         } );
-
-        // Emit that player left so that remaining player can also left
-        socket.emit(SOCKET_EVENTS.PLAYER_LEFT, true);
-
 
         // Delte from MongoDB
         await Room.deleteOne({ _id: room._id });
